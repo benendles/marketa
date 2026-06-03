@@ -1,0 +1,184 @@
+// Marketa – Prisma Schema
+// Run: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ListingCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  BOOKING
+  MESSAGE
+  REVIEW
+  PAYMENT
+  SYSTEM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  avatar        String?
+  role          Role      @default(BUYER)
+  bio           String?
+  location      String?
+  isVerified    Boolean   @default(false)
+  isSuspended   Boolean   @default(false)
+  stripeCustomerId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  listings        Listing[]
+  buyerBookings   Booking[]      @relation("BuyerBookings")
+  sellerBookings  Booking[]      @relation("SellerBookings")
+  sentMessages    Message[]      @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  reviewsGiven    Review[]       @relation("ReviewsGiven")
+  reviewsReceived Review[]       @relation("ReviewsReceived")
+  notifications   Notification[]
+  conversations   ConversationParticipant[]
+}
+
+model Listing {
+  id          String           @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  category    String
+  condition   ListingCondition
+  location    String
+  images      String[]
+  isActive    Boolean          @default(true)
+  isFeatured  Boolean          @default(false)
+  views       Int              @default(0)
+  saves       Int              @default(0)
+  tags        String[]
+  sellerId    String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  seller    User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+  reviews   Review[]
+  conversations Conversation[]
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  listingId   String
+  buyerId     String
+  sellerId    String
+  status      BookingStatus @default(PENDING)
+  startDate   DateTime
+  endDate     DateTime?
+  totalAmount Float
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  buyer   User    @relation("BuyerBookings", fields: [buyerId], references: [id])
+  seller  User    @relation("SellerBookings", fields: [sellerId], references: [id])
+  payment Payment?
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  bookingId       String   @unique
+  amount          Float
+  currency        String   @default("usd")
+  stripePaymentId String   @unique
+  status          String
+  createdAt       DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  listingId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listing      Listing?                  @relation(fields: [listingId], references: [id])
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@id([conversationId, userId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  receiverId     String
+  content        String
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id])
+  receiver     User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String
+  reviewerId String
+  revieweeId String
+  listingId  String?
+  createdAt  DateTime @default(now())
+
+  reviewer User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+  listing  Listing? @relation(fields: [listingId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
