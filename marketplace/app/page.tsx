@@ -1,327 +1,204 @@
 import Link from "next/link";
-import {
-  Search, Shield, MessageSquare, CalendarCheck, Star,
-  Smartphone, ShieldCheck, Laptop, Shirt, Home, Dumbbell,
-  Car, Wrench, Building2, Briefcase, ArrowRight, MapPin,
-  ChevronRight, type LucideIcon,
-} from "lucide-react";
-import { mockListings } from "@/lib/mock-data";
+import { Star, ChevronRight, Truck, Shield, RotateCcw, Headphones } from "lucide-react";
+import { mockListings, CATEGORIES } from "@/lib/mock-data";
 import ListingCard from "@/components/marketplace/ListingCard";
 import { formatCurrency } from "@/lib/utils";
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  Electronics: Laptop,
-  Fashion: Shirt,
-  "Home & Garden": Home,
-  Sports: Dumbbell,
-  Vehicles: Car,
-  Services: Wrench,
-  "Real Estate": Building2,
-  Jobs: Briefcase,
-};
-
-const CATEGORIES = [
-  { name: "Electronics", count: 8432 },
-  { name: "Fashion", count: 12847 },
-  { name: "Home & Garden", count: 6291 },
-  { name: "Sports", count: 4183 },
-  { name: "Vehicles", count: 2847 },
-  { name: "Services", count: 5621 },
-  { name: "Real Estate", count: 1924 },
-  { name: "Jobs", count: 3148 },
+const TRUST_BADGES = [
+  { Icon: Truck, label: "Free delivery", sub: "On orders over $35" },
+  { Icon: Shield, label: "Secure payments", sub: "Stripe-protected checkout" },
+  { Icon: RotateCcw, label: "Easy returns", sub: "30-day return policy" },
+  { Icon: Headphones, label: "24/7 support", sub: "Always here to help" },
 ];
 
-const FEATURES = [
-  { Icon: Shield, title: "Secure payments", desc: "Stripe escrow holds funds until you confirm receipt." },
-  { Icon: MessageSquare, title: "Direct messaging", desc: "Real-time chat between buyers and sellers." },
-  { Icon: CalendarCheck, title: "Booking system", desc: "Schedule pickups and appointments from any listing." },
-  { Icon: Star, title: "Verified reviews", desc: "Every review is tied to a completed transaction." },
-  { Icon: Smartphone, title: "Mobile app", desc: "Browse, list, chat, and pay on iOS and Android." },
-  { Icon: ShieldCheck, title: "Buyer protection", desc: "Disputes resolved within 24 hours, every time." },
-];
-
-const STEPS = [
-  { num: "1", title: "Create an account", desc: "Sign up in under a minute. No credit card required to browse." },
-  { num: "2", title: "Browse or list", desc: "Search thousands of items or post your own in 2 minutes." },
-  { num: "3", title: "Chat and agree", desc: "Message the seller directly and close the deal." },
-  { num: "4", title: "Pay securely", desc: "Stripe holds your payment until you confirm everything is right." },
-];
-
-const TESTIMONIALS = [
-  {
-    quote: "Sold my camera kit in three days at a price I couldn't find anywhere else. The chat made the whole process seamless.",
-    name: "Alex R.",
-    role: "Seller · San Francisco",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-  },
-  {
-    quote: "Found a MacBook Pro for $400 under retail. The verified seller reviews made me confident before I even sent a message.",
-    name: "Jordan K.",
-    role: "Buyer · Austin",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan",
-  },
-  {
-    quote: "I book freelance clients through Marketa every week. The scheduling system handles itself so I can focus on the work.",
-    name: "Sam C.",
-    role: "Service provider · New York",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam",
-  },
+const DEALS = [
+  { label: "Up to 40% off", sub: "Electronics", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&q=80" },
+  { label: "New arrivals", sub: "Fashion", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80" },
+  { label: "Best sellers", sub: "Home & Garden", img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80" },
+  { label: "Starting at $19", sub: "Sports & Outdoor", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&q=80" },
 ];
 
 export default function HomePage() {
-  const featured = mockListings.filter((l) => l.isFeatured).slice(0, 4);
-  const heroCards = mockListings.slice(0, 3);
+  const allListings = mockListings;
+  const featured = allListings.filter((l) => l.isFeatured).slice(0, 4);
+  const electronics = allListings.filter((l) => l.category === "Electronics").slice(0, 4);
+  const recent = allListings.slice(0, 8);
 
   return (
-    <div className="bg-white">
+    <div className="bg-[#EAEDED] min-h-screen">
 
-      {/* ─── Hero ─── */}
-      <section className="bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 py-14 lg:py-20 items-center">
-
-            {/* Copy */}
-            <div className="lg:col-span-3">
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold text-white leading-[1.15] tracking-tight mb-4">
-                Buy and sell,<br />
-                <span className="text-indigo-400">the right way.</span>
-              </h1>
-              <p className="text-slate-400 text-lg mb-8 max-w-lg leading-relaxed">
-                Direct deals between real people — secure payments, verified reviews, and real-time chat. No middlemen.
-              </p>
-
-              {/* Search */}
-              <div className="flex max-w-xl rounded-xl bg-white overflow-hidden shadow-xl mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="What are you looking for?"
-                    className="w-full pl-11 pr-4 py-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none"
-                  />
-                </div>
-                <select
-                  title="Category"
-                  className="hidden sm:block border-l border-slate-100 px-4 py-4 text-sm text-slate-600 bg-white focus:outline-none cursor-pointer appearance-none"
-                >
-                  <option value="">All categories</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c.name} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
-                <Link
-                  href="/marketplace"
-                  className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition whitespace-nowrap"
-                >
-                  Search
-                </Link>
-              </div>
-
-              {/* CTAs */}
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/marketplace"
-                  className="px-5 py-2.5 rounded-lg bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition"
-                >
-                  Browse listings
-                </Link>
-                <Link
-                  href="/listings/create"
-                  className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition flex items-center gap-1.5"
-                >
-                  Post an item <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Floating listing cards */}
-            <div className="hidden lg:block lg:col-span-2">
-              <div className="space-y-3">
-                {heroCards.map((listing, i) => (
-                  <div
-                    key={listing.id}
-                    className={`bg-white rounded-2xl p-3 flex items-center gap-3 shadow-xl border border-slate-100 transition-transform ${
-                      i === 1 ? "translate-x-5" : i === 2 ? "-translate-x-3" : ""
-                    }`}
-                  >
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      className="w-14 h-14 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{listing.title}</p>
-                      <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1 truncate">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        {listing.location}
-                      </p>
-                      <p className="text-sm font-bold text-indigo-600 mt-1">{formatCurrency(listing.price)}</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-slate-600 mt-4 text-right">48,000+ listings live</p>
+      {/* ── Hero banner ── */}
+      <div className="relative overflow-hidden bg-linear-to-b from-[#1a3c5e] to-[#EAEDED]">
+        <div className="max-w-375 mx-auto px-4 py-12 sm:py-16 flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-1 text-center md:text-left">
+            <p className="text-[#FF9900] text-sm font-semibold mb-2 tracking-wide uppercase">
+              Welcome to Marketa
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
+              Buy &amp; Sell<br />
+              <span className="text-[#FF9900]">Anything.</span> Anywhere.
+            </h1>
+            <p className="text-slate-300 text-base mb-6 max-w-md mx-auto md:mx-0">
+              Millions of items — from electronics to fashion, services to real estate.
+              Secure payments. Verified sellers. Real-time chat.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+              <Link
+                href="/marketplace"
+                className="px-6 py-3 rounded-full bg-[#FF9900] hover:bg-[#F3A847] text-[#131921] font-bold text-sm transition"
+              >
+                Shop now
+              </Link>
+              <Link
+                href="/listings/create"
+                className="px-6 py-3 rounded-full bg-white hover:bg-[#EAEDED] text-[#0F1111] font-bold text-sm transition border border-[#D5D9D9]"
+              >
+                Start selling
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ─── Stats ─── */}
-      <section className="border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:divide-x divide-slate-100">
-            {[
-              { value: "12,847", label: "Active users" },
-              { value: "48,293", label: "Listings" },
-              { value: "9,412", label: "Deals completed" },
-              { value: "4.87 / 5", label: "Average rating" },
-            ].map((s) => (
-              <div key={s.label} className="text-center md:pl-6 first:pl-0">
-                <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">{s.value}</p>
-                <p className="text-sm text-slate-500 mt-1">{s.label}</p>
-              </div>
+          {/* Hero listing cards */}
+          <div className="hidden md:flex gap-3">
+            {allListings.slice(0, 2).map((l) => (
+              <Link key={l.id} href={`/listings/${l.id}`}>
+                <div className="bg-white rounded shadow p-3 w-44 hover:shadow-md transition">
+                  <img src={l.images[0]} alt={l.title} className="w-full h-32 object-cover rounded mb-2" />
+                  <p className="text-xs font-medium text-[#0F1111] line-clamp-2 leading-snug mb-1">{l.title}</p>
+                  <p className="text-sm font-bold text-[#B12704]">{formatCurrency(l.price)}</p>
+                  <div className="flex gap-px mt-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`w-3 h-3 ${i < Math.round(l.rating) ? "fill-[#FF9900] text-[#FF9900]" : "fill-[#ddd] text-[#ddd]"}`} />
+                    ))}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ─── Categories ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex items-end justify-between mb-7">
-          <h2 className="text-lg font-bold text-slate-900">Browse by category</h2>
-          <Link href="/marketplace" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5">
-            All listings <ChevronRight className="w-4 h-4" />
+      <div className="max-w-375 mx-auto px-3 sm:px-4 space-y-4 pb-10">
+
+        {/* ── Today's deals cards ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {DEALS.map((d) => (
+            <Link key={d.label} href="/marketplace" className="bg-white p-4 shadow-sm hover:shadow transition rounded-sm">
+              <img src={d.img} alt={d.sub} className="w-full h-36 object-cover mb-3 rounded" />
+              <p className="font-bold text-[#0F1111] text-sm">{d.label}</p>
+              <p className="text-xs text-[#565959]">{d.sub}</p>
+              <p className="text-xs text-[#007185] mt-2 flex items-center gap-0.5">
+                See all deals <ChevronRight className="w-3 h-3" />
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Sign in banner ── */}
+        <div className="bg-white shadow-sm rounded-sm px-5 py-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-[#0F1111]">Sign in for the best experience</p>
+            <p className="text-sm text-[#565959]">Personalized recommendations, order tracking, and saved listings.</p>
+          </div>
+          <Link
+            href="/auth/login"
+            className="shrink-0 px-5 py-2 rounded-full bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] text-[#0F1111] text-sm font-medium transition"
+          >
+            Sign in
           </Link>
         </div>
-        {/* Carousel on mobile, grid on desktop */}
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none sm:grid sm:grid-cols-4 lg:grid-cols-8 sm:overflow-visible sm:pb-0">
-          {CATEGORIES.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.name];
-            return (
+
+        {/* ── Shop by category ── */}
+        <div className="bg-white shadow-sm rounded-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-[#0F1111]">Shop by category</h2>
+            <Link href="/marketplace" className="text-sm text-[#007185] hover:text-[#C7511F] flex items-center gap-0.5 transition">
+              See all <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+            {CATEGORIES.map((cat) => (
               <Link
                 key={cat.name}
                 href={`/marketplace?category=${cat.name}`}
-                className="group flex flex-col items-center gap-2 py-5 px-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50 transition shrink-0 w-22.5 sm:w-auto text-center"
+                className="flex flex-col items-center gap-2 group text-center"
               >
-                {Icon && <Icon className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" strokeWidth={1.5} />}
-                <span className="text-xs font-medium text-slate-600 group-hover:text-indigo-700 transition-colors leading-tight">{cat.name}</span>
-                <span className="text-[11px] text-slate-400">{cat.count.toLocaleString()}</span>
+                <div className="w-14 h-14 rounded-full bg-[#EAEDED] group-hover:bg-[#FFD814] transition flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 bg-[#131921] rounded-full opacity-20 group-hover:opacity-30" />
+                </div>
+                <span className="text-xs font-medium text-[#0F1111] leading-tight group-hover:text-[#C7511F] transition">
+                  {cat.name}
+                </span>
               </Link>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </section>
 
-      {/* ─── Featured listings ─── */}
-      <section className="bg-slate-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-7">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Popular right now</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Top picks across the platform this week</p>
-            </div>
-            <Link href="/marketplace" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 shrink-0">
-              View all <ChevronRight className="w-4 h-4" />
+        {/* ── Featured listings ── */}
+        <div className="bg-white shadow-sm rounded-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-[#0F1111]">Today&apos;s featured deals</h2>
+            <Link href="/marketplace" className="text-sm text-[#007185] hover:text-[#C7511F] flex items-center gap-0.5 transition">
+              See all <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
             {featured.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         </div>
-      </section>
 
-      {/* ─── How it works ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8">
-          <div className="lg:col-span-1">
-            <h2 className="text-lg font-bold text-slate-900 mb-2">How it works</h2>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              From signup to completed deal in four steps. No hidden fees.
-            </p>
+        {/* ── Electronics ── */}
+        <div className="bg-white shadow-sm rounded-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-[#0F1111]">Electronics</h2>
+            <Link href="/marketplace?category=Electronics" className="text-sm text-[#007185] hover:text-[#C7511F] flex items-center gap-0.5 transition">
+              See more <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {STEPS.map((step) => (
-              <div key={step.num}>
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold flex items-center justify-center mb-4">
-                  {step.num}
-                </div>
-                <h3 className="text-sm font-semibold text-slate-900 mb-1.5">{step.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+            {electronics.length > 0
+              ? electronics.map((l) => <ListingCard key={l.id} listing={l} />)
+              : recent.slice(0, 4).map((l) => <ListingCard key={l.id} listing={l} />)}
           </div>
         </div>
-      </section>
 
-      {/* ─── Features ─── */}
-      <section className="bg-slate-950 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="text-lg font-bold text-white mb-1">Built for trust</h2>
-              <p className="text-sm text-slate-400">Every feature is designed to make transactions safer and faster.</p>
-            </div>
+        {/* ── All listings ── */}
+        <div className="bg-white shadow-sm rounded-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-[#0F1111]">More items to explore</h2>
+            <Link href="/marketplace" className="text-sm text-[#007185] hover:text-[#C7511F] flex items-center gap-0.5 transition">
+              See all <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-slate-800">
-            {FEATURES.map(({ Icon, title, desc }) => (
-              <div key={title} className="bg-slate-950 hover:bg-[#0d1117] transition p-7">
-                <div className="w-8 h-8 rounded-lg bg-indigo-900/50 flex items-center justify-center mb-4">
-                  <Icon className="w-4 h-4 text-indigo-400" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-sm font-semibold text-white mb-1.5">{title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1">
+            {recent.map((l) => <ListingCard key={l.id} listing={l} />)}
+          </div>
+          <div className="mt-4 text-center">
+            <Link
+              href="/marketplace"
+              className="inline-block px-8 py-2.5 rounded-full bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] text-[#0F1111] text-sm font-medium transition"
+            >
+              See all listings
+            </Link>
           </div>
         </div>
-      </section>
 
-      {/* ─── Testimonials ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="text-lg font-bold text-slate-900 mb-8">What people say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="border border-slate-200 rounded-xl p-6 bg-white">
-              <div className="flex gap-px mb-4">
-                {[...Array(5)].map((_, idx) => (
-                  <Star key={idx} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <img src={t.avatar} alt={t.name} className="w-8 h-8 rounded-full bg-slate-100" />
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                  <p className="text-xs text-slate-400">{t.role}</p>
-                </div>
+        {/* ── Trust badges ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {TRUST_BADGES.map(({ Icon, label, sub }) => (
+            <div key={label} className="bg-white shadow-sm rounded-sm p-4 flex items-start gap-3">
+              <Icon className="w-6 h-6 text-[#FF9900] shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm font-semibold text-[#0F1111]">{label}</p>
+                <p className="text-xs text-[#565959] mt-0.5">{sub}</p>
               </div>
             </div>
           ))}
         </div>
-      </section>
 
-      {/* ─── CTA ─── */}
-      <section className="border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="bg-indigo-600 rounded-2xl px-8 sm:px-12 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <h2 className="text-xl font-bold text-white mb-1">Ready to start?</h2>
-              <p className="text-indigo-200 text-sm">Free to join. Post your first listing in under 2 minutes.</p>
-            </div>
-            <div className="flex gap-3 shrink-0">
-              <Link href="/auth/register" className="px-5 py-2.5 bg-white text-indigo-700 text-sm font-semibold rounded-lg hover:bg-indigo-50 transition">
-                Create account
-              </Link>
-              <Link href="/marketplace" className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 border border-indigo-400 text-white text-sm font-semibold rounded-lg transition">
-                Browse listings
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

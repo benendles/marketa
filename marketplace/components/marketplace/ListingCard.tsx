@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Heart, MapPin, Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import type { Listing } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
@@ -11,62 +11,95 @@ interface ListingCardProps {
   compact?: boolean;
 }
 
+function StarRating({ rating, count }: { rating: number; count: number }) {
+  return (
+    <div className="flex items-center gap-1.5 mt-1">
+      <div className="flex items-center gap-px">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Star
+            key={i}
+            className={`w-3.5 h-3.5 ${
+              i <= Math.round(rating)
+                ? "fill-[#FF9900] text-[#FF9900]"
+                : "fill-[#ddd] text-[#ddd]"
+            }`}
+          />
+        ))}
+      </div>
+      <span className="text-[#007185] text-xs hover:text-[#C7511F] cursor-pointer">
+        {count.toLocaleString()}
+      </span>
+    </div>
+  );
+}
+
 export default function ListingCard({ listing, compact = false }: ListingCardProps) {
   const [saved, setSaved] = useState(false);
 
   return (
-    <Link href={`/listings/${listing.id}`} className="group block">
-      <div className="bg-white rounded-xl overflow-hidden border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
-        {/* Image */}
-        <div className={`relative overflow-hidden bg-slate-100 ${compact ? "h-36" : "h-48"}`}>
+    <div className="bg-white group flex flex-col h-full hover:shadow-md transition-shadow duration-150 border border-transparent hover:border-[#D5D9D9] rounded-sm overflow-hidden">
+      {/* Image */}
+      <Link href={`/listings/${listing.id}`} className="block">
+        <div className={`relative overflow-hidden bg-white flex items-center justify-center p-3 ${compact ? "h-40" : "h-52"}`}>
           <img
             src={listing.images[0]}
             alt={listing.title}
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-300"
           />
           {listing.isFeatured && (
-            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-xs font-semibold bg-amber-400 text-amber-900">
-              Featured
+            <span className="absolute top-2 left-2 bg-[#CC0C39] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+              Best Seller
             </span>
           )}
           <button
             type="button"
-            aria-label={saved ? "Remove from saved" : "Save listing"}
-            className="absolute bottom-2.5 right-2.5 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow border border-slate-100 opacity-0 group-hover:opacity-100 transition"
+            aria-label={saved ? "Remove from list" : "Add to list"}
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition w-7 h-7 bg-white rounded-full flex items-center justify-center shadow border border-[#D5D9D9]"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               setSaved(!saved);
             }}
           >
-            <Heart className={`w-4 h-4 transition-colors ${saved ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
+            <Heart className={`w-3.5 h-3.5 ${saved ? "fill-[#CC0C39] text-[#CC0C39]" : "text-[#565959]"}`} />
           </button>
         </div>
+      </Link>
 
-        {/* Content */}
-        <div className="p-3.5">
-          <h3 className="font-semibold text-slate-900 text-sm leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors mb-2">
+      {/* Details */}
+      <div className="px-3 pb-3 pt-1 flex flex-col flex-1">
+        <Link href={`/listings/${listing.id}`}>
+          <h3 className="text-sm text-[#0F1111] hover:text-[#C7511F] line-clamp-2 leading-snug cursor-pointer transition-colors">
             {listing.title}
           </h3>
-          <div className="flex items-center gap-1 text-xs text-slate-400 mb-3">
-            <MapPin className="w-3 h-3 shrink-0" />
-            <span className="truncate">{listing.location}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-slate-900 text-sm">
-              {formatCurrency(listing.price)}
-              {listing.category === "Services" && (
-                <span className="text-xs font-normal text-slate-400 ml-0.5">/hr</span>
-              )}
-            </span>
-            <div className="flex items-center gap-1 text-xs text-slate-500">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="font-medium">{listing.rating}</span>
-              <span className="text-slate-300">({listing.reviewCount})</span>
-            </div>
-          </div>
+        </Link>
+
+        <StarRating rating={listing.rating} count={listing.reviewCount} />
+
+        {/* Price */}
+        <div className="mt-2">
+          <span className="text-xs text-[#565959] align-top leading-5">$</span>
+          <span className="text-xl font-medium text-[#0F1111] leading-none">
+            {Math.floor(listing.price).toLocaleString()}
+          </span>
+          <span className="text-xs text-[#565959]">
+            .{String(listing.price % 1).substring(2).padEnd(2, "0") || "00"}
+          </span>
         </div>
+
+        <p className="text-xs text-[#007185] mt-0.5">FREE delivery</p>
+        <p className="text-xs text-[#565959] mt-0.5 truncate">{listing.location}</p>
+
+        {/* Add to cart button */}
+        <Link
+          href={`/listings/${listing.id}`}
+          className="mt-auto pt-3 block"
+        >
+          <span className="block w-full text-center py-1.5 px-3 rounded-full bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-sm font-medium border border-[#FCD200] transition cursor-pointer">
+            View listing
+          </span>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }

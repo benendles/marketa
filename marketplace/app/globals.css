@@ -1,71 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --secondary: #f59e0b;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --card: #ffffff;
-  --radius: 0.75rem;
+  --amazon-dark:    #131921;
+  --amazon-mid:     #232F3E;
+  --amazon-orange:  #FF9900;
+  --amazon-orange2: #F3A847;
+  --amazon-page:    #EAEDED;
+  --amazon-card:    #FFFFFF;
+  --amazon-price:   #B12704;
+  --amazon-link:    #007185;
+  --amazon-star:    #FF9900;
+  --amazon-text:    #0F1111;
+  --amazon-muted:   #565959;
+  --amazon-border:  #D5D9D9;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-dark: var(--primary-dark);
-  --color-secondary: var(--secondary);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-card: var(--card);
-  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --color-az-dark:   var(--amazon-dark);
+  --color-az-mid:    var(--amazon-mid);
+  --color-az-orange: var(--amazon-orange);
+  --color-az-page:   var(--amazon-page);
+  --color-az-price:  var(--amazon-price);
+  --color-az-link:   var(--amazon-link);
+  --color-az-border: var(--amazon-border);
+  --font-sans: var(--font-sans), "Amazon Ember", Arial, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { max-width: 100vw; overflow-x: hidden; }
+body { background: #EAEDED; color: #0F1111; }
+a { color: inherit; text-decoration: none; }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.6;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Smooth transitions */
-.transition-all {
-  transition: all 0.2s ease;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
