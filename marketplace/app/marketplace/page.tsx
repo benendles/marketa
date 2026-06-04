@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { mockListings, CATEGORIES } from "@/lib/mock-data";
 import ListingCard from "@/components/marketplace/ListingCard";
 import type { ListingCategory, ListingCondition } from "@/types";
 
 const CONDITIONS: ListingCondition[] = ["New", "Like New", "Good", "Fair", "Poor"];
 const SORT_OPTIONS = [
-  { value: "newest", label: "Newest First" },
+  { value: "newest", label: "Newest" },
   { value: "price_asc", label: "Price: Low to High" },
   { value: "price_desc", label: "Price: High to Low" },
   { value: "rating", label: "Top Rated" },
@@ -21,229 +22,256 @@ export default function MarketplacePage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const filtered = useMemo(() => {
-    let results = [...mockListings];
-    if (query) results = results.filter((l) => l.title.toLowerCase().includes(query.toLowerCase()) || l.description.toLowerCase().includes(query.toLowerCase()));
-    if (selectedCategory) results = results.filter((l) => l.category === selectedCategory);
-    if (selectedCondition) results = results.filter((l) => l.condition === selectedCondition);
-    if (minPrice) results = results.filter((l) => l.price >= Number(minPrice));
-    if (maxPrice) results = results.filter((l) => l.price <= Number(maxPrice));
-    if (sortBy === "price_asc") results.sort((a, b) => a.price - b.price);
-    else if (sortBy === "price_desc") results.sort((a, b) => b.price - a.price);
-    else if (sortBy === "rating") results.sort((a, b) => b.rating - a.rating);
-    return results;
+    let r = [...mockListings];
+    if (query) r = r.filter((l) => l.title.toLowerCase().includes(query.toLowerCase()));
+    if (selectedCategory) r = r.filter((l) => l.category === selectedCategory);
+    if (selectedCondition) r = r.filter((l) => l.condition === selectedCondition);
+    if (minPrice) r = r.filter((l) => l.price >= Number(minPrice));
+    if (maxPrice) r = r.filter((l) => l.price <= Number(maxPrice));
+    if (sortBy === "price_asc") r.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price_desc") r.sort((a, b) => b.price - a.price);
+    else if (sortBy === "rating") r.sort((a, b) => b.rating - a.rating);
+    return r;
   }, [query, selectedCategory, selectedCondition, minPrice, maxPrice, sortBy]);
 
   const clearFilters = () => {
-    setQuery("");
-    setSelectedCategory("");
-    setSelectedCondition("");
-    setMinPrice("");
-    setMaxPrice("");
-    setSortBy("newest");
+    setQuery(""); setSelectedCategory(""); setSelectedCondition("");
+    setMinPrice(""); setMaxPrice(""); setSortBy("newest");
   };
 
-  const hasFilters = query || selectedCategory || selectedCondition || minPrice || maxPrice;
+  const hasFilters = !!(query || selectedCategory || selectedCondition || minPrice || maxPrice);
 
   const Sidebar = () => (
-    <aside className="w-full lg:w-64 flex-shrink-0">
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 sticky top-20">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-slate-900">Filters</h3>
-          {hasFilters && (
-            <button onClick={clearFilters} className="text-xs text-indigo-600 hover:underline">Clear all</button>
-          )}
-        </div>
+    <div className="bg-white border border-[#D5D9D9] sticky top-28">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#D5D9D9]">
+        <span className="text-sm font-bold text-[#0F1111]">Filters</span>
+        {hasFilters && (
+          <button type="button" onClick={clearFilters} className="text-xs text-[#007185] hover:text-[#C7511F] transition">
+            Clear all
+          </button>
+        )}
+      </div>
 
-        {/* Category */}
-        <div className="mb-5">
-          <h4 className="text-sm font-semibold text-slate-700 mb-2">Category</h4>
-          <div className="space-y-1">
+      {/* Category */}
+      <div className="border-b border-[#D5D9D9] px-4 py-4">
+        <p className="text-xs font-bold text-[#0F1111] uppercase tracking-wide mb-2">Category</p>
+        <div className="space-y-0.5">
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("")}
+            className={`w-full text-left px-2 py-1.5 text-sm transition ${!selectedCategory ? "text-[#C7511F] font-semibold" : "text-[#007185] hover:text-[#C7511F]"}`}
+          >
+            All Categories
+          </button>
+          {CATEGORIES.map((cat) => (
             <button
-              onClick={() => setSelectedCategory("")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${!selectedCategory ? "bg-indigo-50 text-indigo-700 font-medium" : "text-slate-600 hover:bg-slate-50"}`}
+              type="button"
+              key={cat.name}
+              onClick={() => setSelectedCategory(cat.name as ListingCategory)}
+              className={`w-full text-left px-2 py-1.5 text-sm flex items-center justify-between transition ${selectedCategory === cat.name ? "text-[#C7511F] font-semibold" : "text-[#007185] hover:text-[#C7511F]"}`}
             >
-              All Categories
+              <span>{cat.name}</span>
+              <span className="text-xs text-[#565959]">{cat.count.toLocaleString()}</span>
             </button>
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => setSelectedCategory(cat.name as ListingCategory)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition flex items-center justify-between ${selectedCategory === cat.name ? "bg-indigo-50 text-indigo-700 font-medium" : "text-slate-600 hover:bg-slate-50"}`}
-              >
-                <span>{cat.icon} {cat.name}</span>
-                <span className="text-xs text-slate-400">{cat.count.toLocaleString()}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Price range */}
-        <div className="mb-5">
-          <h4 className="text-sm font-semibold text-slate-700 mb-2">Price Range</h4>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Min"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-        </div>
-
-        {/* Condition */}
-        <div className="mb-5">
-          <h4 className="text-sm font-semibold text-slate-700 mb-2">Condition</h4>
-          <div className="space-y-1">
-            <button
-              onClick={() => setSelectedCondition("")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${!selectedCondition ? "bg-indigo-50 text-indigo-700 font-medium" : "text-slate-600 hover:bg-slate-50"}`}
-            >
-              Any Condition
-            </button>
-            {CONDITIONS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setSelectedCondition(c)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${selectedCondition === c ? "bg-indigo-50 text-indigo-700 font-medium" : "text-slate-600 hover:bg-slate-50"}`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
-    </aside>
+
+      {/* Price */}
+      <div className="border-b border-[#D5D9D9] px-4 py-4">
+        <p className="text-xs font-bold text-[#0F1111] uppercase tracking-wide mb-2">Price</p>
+        <div className="flex gap-2 items-center">
+          <input
+            type="number"
+            placeholder="Min"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            className="w-full px-2.5 py-2 border border-[#D5D9D9] text-sm text-[#0F1111] focus:outline-none focus:border-[#FF9900]"
+          />
+          <span className="text-[#565959] text-sm shrink-0">–</span>
+          <input
+            type="number"
+            placeholder="Max"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="w-full px-2.5 py-2 border border-[#D5D9D9] text-sm text-[#0F1111] focus:outline-none focus:border-[#FF9900]"
+          />
+        </div>
+      </div>
+
+      {/* Condition */}
+      <div className="px-4 py-4">
+        <p className="text-xs font-bold text-[#0F1111] uppercase tracking-wide mb-2">Condition</p>
+        <div className="space-y-0.5">
+          <button
+            type="button"
+            onClick={() => setSelectedCondition("")}
+            className={`w-full text-left px-2 py-1.5 text-sm transition ${!selectedCondition ? "text-[#C7511F] font-semibold" : "text-[#007185] hover:text-[#C7511F]"}`}
+          >
+            Any
+          </button>
+          {CONDITIONS.map((c) => (
+            <button
+              type="button"
+              key={c}
+              onClick={() => setSelectedCondition(c)}
+              className={`w-full text-left px-2 py-1.5 text-sm transition ${selectedCondition === c ? "text-[#C7511F] font-semibold" : "text-[#007185] hover:text-[#C7511F]"}`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Browse Marketplace</h1>
-        <p className="text-slate-500 mt-1">
-          {filtered.length.toLocaleString()} listing{filtered.length !== 1 ? "s" : ""} found
-        </p>
-      </div>
+    <div className="bg-[#EAEDED] min-h-screen">
 
-      {/* Search + Sort bar */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="flex-1 relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+      {/* Search strip */}
+      <div className="bg-[#131921] px-4 py-3 flex items-center gap-3">
+        <div className="flex-1 flex items-center bg-white overflow-hidden max-w-2xl">
+          <Search className="ml-3 w-4 h-4 text-[#565959] shrink-0" />
           <input
             type="text"
-            placeholder="Search listings..."
+            placeholder="Search Marketa"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+            className="flex-1 px-3 py-2.5 text-sm text-[#0F1111] placeholder:text-[#565959] focus:outline-none"
           />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} className="pr-3">
+              <X className="w-4 h-4 text-[#565959]" />
+            </button>
+          )}
         </div>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-slate-700"
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-white text-[#0F1111] text-sm font-medium"
         >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+          <SlidersHorizontal className="w-4 h-4" />
+          Filters
+          {hasFilters && <span className="w-2 h-2 bg-[#FF9900] rounded-full" />}
+        </button>
+      </div>
+
+      {/* Category pills */}
+      <div className="bg-[#232F3E] px-3 overflow-x-auto scrollbar-none">
+        <div className="flex gap-2 py-2">
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition whitespace-nowrap shrink-0 ${!selectedCategory ? "bg-[#FF9900] border-[#FF9900] text-[#131921]" : "border-white/30 text-white hover:border-white/60"}`}
+          >
+            All
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button
+              type="button"
+              key={cat.name}
+              onClick={() => setSelectedCategory(cat.name as ListingCategory)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition whitespace-nowrap shrink-0 ${selectedCategory === cat.name ? "bg-[#FF9900] border-[#FF9900] text-[#131921]" : "border-white/30 text-white hover:border-white/60"}`}
+            >
+              {cat.name}
+            </button>
           ))}
-        </select>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`px-4 py-3 rounded-xl border text-sm transition ${viewMode === "grid" ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+        </div>
+      </div>
+
+      {/* Results + sort */}
+      <div className="bg-white border-b border-[#D5D9D9] px-4 py-2.5 flex items-center justify-between">
+        <p className="text-sm text-[#0F1111]">
+          <span className="font-bold">{filtered.length.toLocaleString()}</span>
+          <span className="text-[#565959]"> results</span>
+          {selectedCategory && <span className="text-[#565959]"> in <span className="text-[#0F1111] font-medium">{selectedCategory}</span></span>}
+        </p>
+        <div className="flex items-center gap-2">
+          <label htmlFor="sort" className="text-xs text-[#565959] hidden sm:block">Sort by</label>
+          <select
+            id="sort"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-sm text-[#0F1111] border border-[#D5D9D9] px-2 py-1 focus:outline-none focus:border-[#FF9900]"
           >
-            ⊞
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`px-4 py-3 rounded-xl border text-sm transition ${viewMode === "list" ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-          >
-            ☰
-          </button>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-sm transition"
-          >
-            ⚙ Filters {hasFilters && <span className="ml-1 w-2 h-2 bg-indigo-600 rounded-full inline-block" />}
-          </button>
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       {/* Active filter chips */}
       {hasFilters && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="bg-white border-b border-[#D5D9D9] px-4 py-2 flex flex-wrap gap-2">
           {selectedCategory && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#EAEDED] text-[#0F1111] text-xs font-medium border border-[#D5D9D9]">
               {selectedCategory}
-              <button onClick={() => setSelectedCategory("")} className="ml-1 hover:text-indigo-900">✕</button>
+              <button type="button" aria-label="Remove category filter" onClick={() => setSelectedCategory("")}><X className="w-3 h-3" /></button>
             </span>
           )}
           {selectedCondition && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#EAEDED] text-[#0F1111] text-xs font-medium border border-[#D5D9D9]">
               {selectedCondition}
-              <button onClick={() => setSelectedCondition("")} className="ml-1 hover:text-indigo-900">✕</button>
+              <button type="button" aria-label="Remove condition filter" onClick={() => setSelectedCondition("")}><X className="w-3 h-3" /></button>
             </span>
           )}
           {(minPrice || maxPrice) && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
-              ${minPrice || "0"} – ${maxPrice || "∞"}
-              <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="ml-1 hover:text-indigo-900">✕</button>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#EAEDED] text-[#0F1111] text-xs font-medium border border-[#D5D9D9]">
+              ${minPrice || "0"} – ${maxPrice || "any"}
+              <button type="button" aria-label="Remove price filter" onClick={() => { setMinPrice(""); setMaxPrice(""); }}><X className="w-3 h-3" /></button>
             </span>
           )}
         </div>
       )}
 
-      <div className="flex gap-6">
-        {/* Sidebar – desktop always visible */}
-        <div className="hidden lg:block"><Sidebar /></div>
+      {/* Content */}
+      <div className="max-w-375 mx-auto px-3 py-3 flex gap-3 items-start">
+
+        {/* Desktop sidebar */}
+        <div className="hidden lg:block w-56 shrink-0"><Sidebar /></div>
 
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div className="lg:hidden fixed inset-0 z-50 flex">
-            <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
-            <div className="w-72 bg-white h-full overflow-y-auto p-4">
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-bold text-slate-900">Filters</span>
-                <button onClick={() => setSidebarOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <div className="flex-1 bg-black/50" onClick={() => setSidebarOpen(false)} />
+            <div className="w-72 bg-white h-full overflow-y-auto shadow-xl">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#D5D9D9] bg-[#131921]">
+                <span className="text-sm font-bold text-white">Filters</span>
+                <button type="button" aria-label="Close filters" onClick={() => setSidebarOpen(false)}>
+                  <X className="w-5 h-5 text-white" />
+                </button>
               </div>
               <Sidebar />
             </div>
           </div>
         )}
 
-        {/* Listings grid */}
+        {/* Grid */}
         <div className="flex-1 min-w-0">
           {filtered.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">🔍</div>
-              <h3 className="font-bold text-slate-900 mb-2">No listings found</h3>
-              <p className="text-slate-500 text-sm">Try adjusting your filters or search term.</p>
-              <button onClick={clearFilters} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm hover:bg-indigo-700 transition">
-                Clear Filters
+            <div className="bg-white border border-[#D5D9D9] py-16 text-center">
+              <Search className="w-10 h-10 text-[#D5D9D9] mx-auto mb-3" />
+              <p className="font-bold text-[#0F1111] mb-1">No results found</p>
+              <p className="text-sm text-[#565959] mb-4">Try adjusting your filters or search term.</p>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="px-5 py-2 rounded-full bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] text-[#0F1111] text-sm font-semibold transition"
+              >
+                Clear filters
               </button>
             </div>
           ) : (
-            <div className={viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
-              : "space-y-4"
-            }>
-              {filtered.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} compact={viewMode === "list"} />
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
+              {filtered.map((l) => <ListingCard key={l.id} listing={l} />)}
             </div>
           )}
         </div>
       </div>
+
     </div>
   );
 }
