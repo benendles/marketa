@@ -1,10 +1,17 @@
 import { Tabs } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
+const ORANGE = "#FF9900";
+const INACTIVE = "#8d8d8d";
+const TAB_BG = "#131921";
+
+type IconName = React.ComponentProps<typeof Ionicons>["name"];
+
+function TabIcon({ name, focused }: { name: IconName; focused: boolean }) {
   return (
-    <View style={[styles.tabIcon, focused && styles.tabIconActive]}>
-      <Text style={styles.emoji}>{emoji}</Text>
+    <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+      <Ionicons name={name} size={22} color={focused ? ORANGE : INACTIVE} />
     </View>
   );
 }
@@ -13,25 +20,73 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#6366f1",
-        tabBarInactiveTintColor: "#94a3b8",
-        tabBarStyle: { borderTopWidth: 1, borderTopColor: "#e2e8f0", backgroundColor: "#fff", height: 60, paddingBottom: 8 },
-        headerStyle: { backgroundColor: "#fff" },
-        headerTintColor: "#0f172a",
-        headerTitleStyle: { fontWeight: "700" },
+        tabBarActiveTintColor: ORANGE,
+        tabBarInactiveTintColor: INACTIVE,
+        tabBarStyle: {
+          backgroundColor: TAB_BG,
+          borderTopWidth: 0,
+          height: 62,
+          paddingBottom: 8,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarActiveLabelStyle: { color: ORANGE },
+        tabBarInactiveLabelStyle: { color: INACTIVE },
+        headerStyle: { backgroundColor: TAB_BG },
+        headerTintColor: "#ffffff",
+        headerTitleStyle: { fontWeight: "700", color: "#ffffff" },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} /> }} />
-      <Tabs.Screen name="marketplace" options={{ title: "Browse", tabBarIcon: ({ focused }) => <TabIcon emoji="🔍" focused={focused} /> }} />
-      <Tabs.Screen name="create" options={{ title: "Sell", tabBarIcon: ({ focused }) => <TabIcon emoji="➕" focused={focused} /> }} />
-      <Tabs.Screen name="messages" options={{ title: "Messages", tabBarIcon: ({ focused }) => <TabIcon emoji="💬" focused={focused} />, tabBarBadge: 2 }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} /> }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ focused }) => <TabIcon name={focused ? "home" : "home-outline"} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: "Browse",
+          tabBarIcon: ({ focused }) => <TabIcon name={focused ? "search" : "search-outline"} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: "Sell",
+          tabBarIcon: ({ focused }) => <TabIcon name={focused ? "add-circle" : "add-circle-outline"} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: "Messages",
+          tabBarBadge: 2,
+          tabBarBadgeStyle: { backgroundColor: "#CC0C39", fontSize: 10 },
+          tabBarIcon: ({ focused }) => <TabIcon name={focused ? "chatbubbles" : "chatbubbles-outline"} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Account",
+          tabBarIcon: ({ focused }) => <TabIcon name={focused ? "person" : "person-outline"} focused={focused} />,
+        }}
+      />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  tabIcon: { alignItems: "center", justifyContent: "center", padding: 4, borderRadius: 8 },
-  tabIconActive: { backgroundColor: "#eef2ff" },
-  emoji: { fontSize: 20 },
+  iconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 36,
+    height: 28,
+    borderRadius: 6,
+  },
+  iconWrapActive: {
+    backgroundColor: "rgba(255,153,0,0.12)",
+  },
 });
